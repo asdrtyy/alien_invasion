@@ -44,7 +44,9 @@ class GameState:
     def load_high_score(self):
         """Загружает рекордное количество очков из файла highscore.txt."""
         try:
-            with open(os.path.join(os.path.dirname(__file__), 'highscore.txt'), 'r') as f:
+            with open(
+                os.path.join(os.path.dirname(__file__), "highscore.txt"), "r"
+            ) as f:
                 return int(f.read())
         except Exception:
             return 0
@@ -52,7 +54,9 @@ class GameState:
     def save_high_score(self):
         """Сохраняет рекордное количество очков в файл highscore.txt."""
         try:
-            with open(os.path.join(os.path.dirname(__file__), 'highscore.txt'), 'w') as f:
+            with open(
+                os.path.join(os.path.dirname(__file__), "highscore.txt"), "w"
+            ) as f:
                 f.write(str(self.high_score))
         except Exception:
             pass

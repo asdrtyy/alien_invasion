@@ -1,15 +1,20 @@
 """
 Экран завершения уровня для Alien Invasion
 """
+
 import pygame
 import sys
 import os
 from button import Button
 
+
 def level_complete_screen(screen, stars, settings, level, is_last_level=False):
-    """Экран завершения уровня. Позволяет продолжить или выйти в меню, на последнем уровне — поздравление."""
+    """
+    Экран завершения уровня. Позволяет продолжить или выйти в меню,
+    на последнем уровне — поздравление.
+    """
     base_folder = os.path.dirname(os.path.dirname(__file__))
-    font_path = os.path.join(base_folder, 'fonts&music', 'retro_font.otf')
+    font_path = os.path.join(base_folder, "fonts&music", "retro_font.otf")
     title_font = pygame.font.Font(font_path, 120)
     if is_last_level:
         title_text = f"Level {level} Complete!"
@@ -33,7 +38,7 @@ def level_complete_screen(screen, stars, settings, level, is_last_level=False):
         center=(settings.screen_width // 2, continue_y),
         font_path=font_path,
         font_size=50,
-        height=button_height
+        height=button_height,
     )
     menu_button = Button(
         screen,
@@ -43,7 +48,7 @@ def level_complete_screen(screen, stars, settings, level, is_last_level=False):
         font_size=50,
         height=button_height,
         bg_color=(32, 32, 32),
-        hover_color=(64, 64, 64)
+        hover_color=(64, 64, 64),
     )
     clock = pygame.time.Clock()
     while True:
@@ -52,9 +57,9 @@ def level_complete_screen(screen, stars, settings, level, is_last_level=False):
                 pygame.quit()
                 sys.exit()
             if not is_last_level and continue_button.is_clicked(event):
-                return 'continue'
+                return "continue"
             if menu_button.is_clicked(event):
-                return 'menu'
+                return "menu"
         stars.update()
         screen.fill(settings.bg_color)
         stars.draw(screen)
@@ -65,10 +70,15 @@ def level_complete_screen(screen, stars, settings, level, is_last_level=False):
             continue_button.draw()
         menu_button.draw()
         # Level внизу экрана — тем же ретро-шрифтом
-        retro_font_path = os.path.join(base_folder, 'fonts&music', 'retro_font.otf')
+        retro_font_path = os.path.join(base_folder, "fonts&music", "retro_font.otf")
         font = pygame.font.Font(retro_font_path, 48)
         level_surf = font.render(f"Level: {level}", True, (255, 255, 255))
-        level_rect = level_surf.get_rect(bottomright=(settings.screen_width - 20, settings.screen_height - 20))
+        level_rect = level_surf.get_rect(
+            bottomright=(
+                settings.screen_width - 20,
+                settings.screen_height - 20,
+            )
+        )
         screen.blit(level_surf, level_rect)
         pygame.display.flip()
         clock.tick(60)

@@ -2,13 +2,16 @@
 import pygame
 import os
 
+
 class Ship:
     """Класс для управления кораблем игрока."""
+
     def __init__(self, ai_game):
         self.screen = ai_game.screen
         self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
-        image_path = os.path.join(os.path.dirname(__file__), '../images/ship.bmp')
+        images_dir = os.path.join(os.path.dirname(__file__), "../images")
+        image_path = os.path.join(images_dir, "ship.bmp")
         original_image = pygame.image.load(image_path).convert_alpha()
         self.image = pygame.transform.scale(original_image, (180, 250))
         self.rect = self.image.get_rect()
@@ -55,7 +58,10 @@ class Ship:
         if self.is_animating:
             # Мигание: показывать/скрывать корабль с интервалом
             now = pygame.time.get_ticks()
-            if ((now - self.animation_start_time) // self.animation_blink_interval) % 2 == 0:
+            blink_phase = (
+                now - self.animation_start_time
+            ) // self.animation_blink_interval
+            if blink_phase % 2 == 0:
                 self.screen.blit(self.image, self.rect)
         else:
             self.screen.blit(self.image, self.rect)

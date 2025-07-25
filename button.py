@@ -1,14 +1,26 @@
-
 """Модуль кнопок для Alien Invasion."""
+
 import os
 import pygame
 
+
 class Button:
     """Класс для кнопки интерфейса."""
-    def __init__(self, screen, text, center, width=500, height=120,
-                 font_path=None, font_size=40,
-                 bg_color=(32, 32, 32), hover_color=(64, 64, 64),
-                 text_color=(255, 255, 255), border_radius=12):
+
+    def __init__(
+        self,
+        screen,
+        text,
+        center,
+        width=500,
+        height=120,
+        font_path=None,
+        font_size=40,
+        bg_color=(32, 32, 32),
+        hover_color=(64, 64, 64),
+        text_color=(255, 255, 255),
+        border_radius=12,
+    ):
         self.screen = screen
         self.text = text
         self.center = center
@@ -41,14 +53,22 @@ class Button:
         """Рисует кнопку на экране."""
         mouse_pos = pygame.mouse.get_pos()
         color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.bg_color
-        pygame.draw.rect(self.screen, color, self.rect, border_radius=self.border_radius)
-        pygame.draw.rect(self.screen, (255, 255, 255), self.rect, 2, border_radius=self.border_radius)
+        pygame.draw.rect(
+            self.screen, color, self.rect, border_radius=self.border_radius
+        )
+        pygame.draw.rect(
+            self.screen,
+            (255, 255, 255),
+            self.rect,
+            2,
+            border_radius=self.border_radius,
+        )
         self.screen.blit(self.text_surf, self.text_rect)
 
     def is_clicked(self, event):
         """Проверяет, была ли нажата кнопка мышью."""
         return (
-            event.type == pygame.MOUSEBUTTONDOWN and
-            event.button == 1 and
-            self.rect.collidepoint(pygame.mouse.get_pos())
+            event.type == pygame.MOUSEBUTTONDOWN
+            and event.button == 1
+            and self.rect.collidepoint(pygame.mouse.get_pos())
         )

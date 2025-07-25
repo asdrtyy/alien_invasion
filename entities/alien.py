@@ -3,13 +3,16 @@ from pygame.sprite import Sprite
 import pygame
 import os
 
+
 class Alien(Sprite):
     """Класс пришельца."""
+
     def __init__(self, ai_game):
         super().__init__()
         self.screen = ai_game.screen
         self.settings = ai_game.settings
-        image_path = os.path.join(os.path.dirname(__file__), '../images/alien.bmp')
+        images_dir = os.path.join(os.path.dirname(__file__), "../images")
+        image_path = os.path.join(images_dir, "alien.bmp")
         self.image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(self.image, (120, 100))
         self.rect = self.image.get_rect()
@@ -23,8 +26,11 @@ class Alien(Sprite):
         self.random_dx = 0.0
         self.random_dy = 0.0
         self.last_random_update = pygame.time.get_ticks()
+
     def check_edges(self):
         screen_rect = self.screen.get_rect()
         return self.rect.right >= screen_rect.right or self.rect.left <= 0
+
     def update(self):
-        pass  # Движение пришельцев теперь только через AlienInvasion._update_aliens
+        pass  # Движение пришельцев теперь только через
+        # AlienInvasion._update_aliens

@@ -1,6 +1,5 @@
 """Alien Invasion — основной игровой модуль."""
 
-
 import sys
 import os
 import pygame
@@ -24,7 +23,8 @@ from level_manager import LevelManager
 def play_background_music():
     """Глобальный запуск фоновой музыки."""
     music_path = os.path.join(
-        os.path.dirname(__file__), 'fonts&music', 'background.mp3')
+        os.path.dirname(__file__), "fonts&music", "background.mp3"
+    )
     try:
         pygame.mixer.init()
         if os.path.exists(music_path) and not pygame.mixer.music.get_busy():
@@ -42,7 +42,8 @@ class AlienInvasion:
         pygame.init()
         self.settings = Settings()
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))
+            (self.settings.screen_width, self.settings.screen_height)
+        )
         pygame.display.set_caption("Alien Invasion")
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -50,7 +51,7 @@ class AlienInvasion:
         self.stars = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
         self.level_manager = LevelManager()
-        self.endless_mode = (level == 9999)
+        self.endless_mode = level == 9999
         # Приводим level к int, если это строка (например, после main_menu)
         try:
             level = int(level)
@@ -58,7 +59,7 @@ class AlienInvasion:
             level = 1
         self.state = GameState(
             level=1 if self.endless_mode else level,
-            lives=getattr(self.settings, 'lives', 3)
+            lives=getattr(self.settings, "lives", 3),
         )
         self._create_fleet()
         self._create_stars()
@@ -141,28 +142,25 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
-        collisions = pygame.sprite.groupcollide(
-            self.aliens, self.bullets, False, True
-        )
+        collisions = pygame.sprite.groupcollide(self.aliens, self.bullets, False, True)
         if collisions:
             try:
                 import builtins
-                if getattr(builtins, 'SOUND_ENABLED', True):
+
+                if getattr(builtins, "SOUND_ENABLED", True):
                     explosion_sound_path = os.path.join(
                         os.path.dirname(__file__),
-                        'fonts&music',
-                        'explosion.wav'
+                        "fonts&music",
+                        "explosion.wav",
                     )
                     if os.path.exists(explosion_sound_path):
-                        explosion_sound = pygame.mixer.Sound(
-                            explosion_sound_path
-                        )
+                        explosion_sound = pygame.mixer.Sound(explosion_sound_path)
                         explosion_sound.set_volume(0.1)
                         explosion_sound.play()
             except Exception:
                 pass
             for alien, bullets in collisions.items():
-                if hasattr(alien, 'health'):
+                if hasattr(alien, "health"):
                     alien.health -= len(bullets)
                     if alien.health <= 0:
                         center = alien.rect.center
@@ -172,20 +170,20 @@ class AlienInvasion:
                         self.explosions.add(explosion)
                         self.state.add_score(100)
         if not self.aliens and not self.explosions:
-            is_last_level = (not self.endless_mode and self.state.level >= 5)
+            is_last_level = not self.endless_mode and self.state.level >= 5
             result = level_complete_screen(
                 self.screen,
                 self.stars,
                 self.settings,
                 self.state.level,
-                is_last_level=is_last_level
+                is_last_level=is_last_level,
             )
-            if result == 'continue' and not is_last_level:
+            if result == "continue" and not is_last_level:
                 self.state.next_level()
                 # self._create_fleet()  # УБРАНО! Новый флот создаётся только
                 # при старте уровня, не при смене движения
                 self.bullets.empty()
-            elif result == 'menu' or (is_last_level and result == 'continue'):
+            elif result == "menu" or (is_last_level and result == "continue"):
                 level = main_menu()
                 self.__init__(level=level)
                 self.run_game()
@@ -197,28 +195,26 @@ class AlienInvasion:
         speed = min(speed, 1.2)  # максимальная скорость 1.2
         # Все пришельцы движутся только вниз
         for alien in self.aliens.sprites():
-            if not hasattr(alien, 'y'):
+            if not hasattr(alien, "y"):
                 alien.y = float(alien.rect.y)
             alien.y += speed
             alien.rect.y = int(alien.y)
             alien.rect.x = int(alien.rect.x)
         # Проверка столкновения с кораблем
         if not self.ship.is_animating:
-            collided_alien = pygame.sprite.spritecollideany(
-                self.ship, self.aliens)
+            collided_alien = pygame.sprite.spritecollideany(self.ship, self.aliens)
             if collided_alien:
                 try:
                     import builtins
-                    if getattr(builtins, 'SOUND_ENABLED', True):
+
+                    if getattr(builtins, "SOUND_ENABLED", True):
                         explosion_sound_path = os.path.join(
                             os.path.dirname(__file__),
-                            'fonts&music',
-                            'explosion.wav'
+                            "fonts&music",
+                            "explosion.wav",
                         )
                         if os.path.exists(explosion_sound_path):
-                            explosion_sound = pygame.mixer.Sound(
-                                explosion_sound_path
-                            )
+                            explosion_sound = pygame.mixer.Sound(explosion_sound_path)
                             explosion_sound.set_volume(0.3)
                             explosion_sound.play()
                 except Exception:
@@ -227,8 +223,10 @@ class AlienInvasion:
                 self.collision_flash_time = pygame.time.get_ticks() + 300
                 self.bullets.empty()
         if (
-            hasattr(self, '_was_animating') and self._was_animating and
-            not self.ship.is_animating
+            hasattr(self, "_was_animating")
+            and self.ship.is_animating
+            and self._was_animating
+            and not self.ship.is_animating
         ):
             self.ship.lives -= 1
             if self.ship.lives <= 0:
@@ -243,9 +241,9 @@ class AlienInvasion:
         alien = Alien(self)
         alien_width, alien_height = alien.rect.size
         interval = max(int(alien_width * 0.3), 10)
-        number_aliens_x = (
-            self.settings.screen_width - alien_width
-        ) // (alien_width + interval)
+        number_aliens_x = (self.settings.screen_width - alien_width) // (
+            alien_width + interval
+        )
         alien_health = params["alien_health"]
         number_lines = min(max(self.state.level, 1), 3)
         self.aliens_arrival_y = 80
@@ -253,11 +251,9 @@ class AlienInvasion:
         for line in range(number_lines):
             y_pos = line * (alien_height + 10)
             total_width = (
-                number_aliens_x * alien_width +
-                (number_aliens_x - 1) * interval
+                number_aliens_x * alien_width + (number_aliens_x - 1) * interval
             )
-            start_x = max(
-                (self.settings.screen_width - total_width) // 2, 0)
+            start_x = max((self.settings.screen_width - total_width) // 2, 0)
             for alien_number in range(number_aliens_x):
                 x_pos = start_x + alien_number * (alien_width + interval)
                 self._create_alien_line(x_pos, y_pos, alien_health)
@@ -269,7 +265,7 @@ class AlienInvasion:
         alien.rect.y = y
         alien.health = health
         self.aliens.add(alien)
-    
+
     def _create_alien(self, alien_number, row_number, health=1):
         alien = Alien(self)
         alien_width, alien_height = alien.rect.size
@@ -294,14 +290,11 @@ class AlienInvasion:
         self.explosions.draw(self.screen)
         # Кнопка музыки убрана из игрового процесса
         if (
-            self.collision_flash_time and
-            pygame.time.get_ticks() < self.collision_flash_time
+            self.collision_flash_time
+            and pygame.time.get_ticks() < self.collision_flash_time
         ):
-            pygame.draw.rect(
-                self.screen, (255, 0, 0), self.screen.get_rect(), 10
-            )
-        live_img_path = os.path.join(
-            os.path.dirname(__file__), 'images', 'live.png')
+            pygame.draw.rect(self.screen, (255, 0, 0), self.screen.get_rect(), 10)
+        live_img_path = os.path.join(os.path.dirname(__file__), "images", "live.png")
         live_img = pygame.image.load(live_img_path).convert_alpha()
         live_img = pygame.transform.scale(live_img, (80, 80))
         for i in range(self.ship.lives):
@@ -309,37 +302,35 @@ class AlienInvasion:
             y = self.settings.screen_height - 70
             self.screen.blit(live_img, (x, y))
         retro_font_path = os.path.join(
-            os.path.dirname(__file__), 'fonts&music', 'retro_font.otf')
+            os.path.dirname(__file__), "fonts&music", "retro_font.otf"
+        )
         font = pygame.font.Font(retro_font_path, 48)
-        level = getattr(self.settings, 'level', self.state.level)
+        level = getattr(self.settings, "level", self.state.level)
         level_surf = font.render(f"Level: {level}", True, (255, 255, 255))
         level_rect = level_surf.get_rect(
             bottomright=(
                 self.settings.screen_width - 20,
-                self.settings.screen_height - 20
+                self.settings.screen_height - 20,
             )
         )
         self.screen.blit(level_surf, level_rect)
-        score_surf = font.render(
-            f"Score: {self.state.score}", True, (255, 255, 255)
-        )
-        score_rect = score_surf.get_rect(
-            topright=(self.settings.screen_width - 20, 20))
+        score_surf = font.render(f"Score: {self.state.score}", True, (255, 255, 255))
+        score_rect = score_surf.get_rect(topright=(self.settings.screen_width - 20, 20))
         self.screen.blit(score_surf, score_rect)
         high_score_surf = font.render(
-            f"High Score: {self.state.high_score}", True, (255, 215, 0))
+            f"High Score: {self.state.high_score}", True, (255, 215, 0)
+        )
         high_score_rect = high_score_surf.get_rect(
-            topright=(self.settings.screen_width - 20, 70))
+            topright=(self.settings.screen_width - 20, 70)
+        )
         self.screen.blit(high_score_surf, high_score_rect)
         pygame.display.flip()
 
     def _pause_menu(self):
-        result = pause_menu(
-            self.screen, self.stars, self.settings, self.state.level
-        )
-        if result == 'menu':
+        result = pause_menu(self.screen, self.stars, self.settings, self.state.level)
+        if result == "menu":
             level = main_menu()
-            if level == 'exit':
+            if level == "exit":
                 self.game_active = False
                 return
             self.__init__(level=level)
@@ -348,12 +339,12 @@ class AlienInvasion:
         result = game_over_screen(
             self.screen, self.stars, self.settings, self.state.level
         )
-        if result == 'restart':
+        if result == "restart":
             self.__init__(level=self.state.level)
             self.run_game()
-        elif result == 'menu':
+        elif result == "menu":
             level = main_menu()
-            if level == 'exit':
+            if level == "exit":
                 self.game_active = False
                 return
             self.__init__(level=level)
@@ -363,11 +354,11 @@ class AlienInvasion:
 # Точка входа
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pygame.init()
     play_background_music()
     level = main_menu()
-    if level == 'exit':
+    if level == "exit":
         sys.exit()
     ai = AlienInvasion(level=level)
     ai.run_game()

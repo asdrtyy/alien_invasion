@@ -1,5 +1,6 @@
 """Модуль управления уровнями для Alien Invasion."""
 
+
 class LevelManager:
     # Класс для управления параметрами уровней
     def __init__(self):
