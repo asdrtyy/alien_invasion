@@ -6,7 +6,7 @@ import os
 class Ship:
     """Класс для управления кораблем игрока."""
 
-    def __init__(self, ai_game):
+    def __init__(self, ai_game, lives=3):
         self.screen = ai_game.screen
         self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
@@ -23,7 +23,7 @@ class Ship:
         self.moving_left = False
         self.moving_up = False
         self.moving_down = False
-        self.lives = 3
+        self.lives = lives
         # Анимация потери жизни
         self.is_animating = False
         self.animation_start_time = 0

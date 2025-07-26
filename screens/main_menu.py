@@ -3,30 +3,34 @@
 """
 
 import pygame
-
 import os
 from button import Button
 from entities.stars import Star
 from settings import Settings
 
+# Загрузка количества разблокированных уровней
+UNLOCK_FILE = "unlocked_levels.txt"
+
+
+def load_unlocked_levels():
+    try:
+        with open(UNLOCK_FILE, "r") as f:
+            return int(f.read().strip())
+    except:
+        return 1
+
+
+def save_unlocked_levels(level):
+    with open(UNLOCK_FILE, "w") as f:
+        f.write(str(level))
+
 
 def main_menu():
-    # --- Музыкальная кнопка ---
     music_btn_size = 48
-    # Загружаем изображения только после установки video mode
-    music_on_img = None
-    music_off_img = None
-    music_btn_rect = None
-    music_playing = [True]
-    sound_enabled = [True]
-    """Главное меню игры. Позволяет выбрать уровень, выйти или начать игру."""
-    # Музыка уже запущена глобально, ничего не делаем
-
     pygame.init()
     settings = Settings()
     screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
     pygame.display.set_caption("Alien Invasion")
-
     clock = pygame.time.Clock()
 
     class DummyGame:
@@ -35,7 +39,6 @@ def main_menu():
             self.settings = settings
 
     dummy_game = DummyGame(screen)
-
     stars = pygame.sprite.Group()
     for _ in range(200):
         stars.add(Star(dummy_game))
@@ -89,139 +92,79 @@ def main_menu():
         hover_color=(64, 64, 64),
     )
 
-    selected_level = [1]  # Используем список для передачи по ссылке
+    selected_level = [1]
+    unlocked_levels = load_unlocked_levels()
     show_levels = [False]
+    COLOR_UNLOCKED = (20, 40, 20)
+    COLOR_UNLOCKED_HOVER = (40, 80, 40)
+    COLOR_LOCKED = (50, 20, 20)
 
     def draw_levels_menu():
+        level_buttons = []
+        level_names = ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5"]
+        spacing = 120
+        start_y = settings.screen_height // 2 - 180
+
+        for i, name in enumerate(level_names):
+            level_index = i + 1
+            is_unlocked = level_index <= unlocked_levels
+
+            btn = Button(
+                screen,
+                text=name,
+                center=(settings.screen_width // 2, start_y + i * spacing),
+                width=400,
+                height=100,
+                font_path=retro_font_path,
+                font_size=50,
+                bg_color=COLOR_UNLOCKED if is_unlocked else COLOR_LOCKED,
+                hover_color=COLOR_UNLOCKED_HOVER if is_unlocked else COLOR_LOCKED,
+            )
+            level_buttons.append((btn, level_index, is_unlocked))
+
+        if unlocked_levels >= 5:
+            endless_btn = Button(
+                screen,
+                text="Endless",
+                center=(settings.screen_width // 2, start_y + 5 * spacing),
+                width=400,
+                height=100,
+                font_path=retro_font_path,
+                font_size=50,
+                bg_color=COLOR_UNLOCKED,
+                hover_color=COLOR_UNLOCKED_HOVER,
+            )
+            level_buttons.append((endless_btn, True))
+
+        selecting = True
         font = pygame.font.Font(retro_font_path, 80)
-        level1_btn = Button(
-            screen,
-            text="Level 1",
-            center=(
-                settings.screen_width // 2,
-                settings.screen_height // 2 - 180,
-            ),
-            width=400,
-            height=100,
-            font_path=retro_font_path,
-            font_size=50,
-        )
-        level2_btn = Button(
-            screen,
-            text="Level 2",
-            center=(
-                settings.screen_width // 2,
-                settings.screen_height // 2 - 60,
-            ),
-            width=400,
-            height=100,
-            font_path=retro_font_path,
-            font_size=50,
-        )
-        level3_btn = Button(
-            screen,
-            text="Level 3",
-            center=(
-                settings.screen_width // 2,
-                settings.screen_height // 2 + 60,
-            ),
-            width=400,
-            height=100,
-            font_path=retro_font_path,
-            font_size=50,
-        )
-        level4_btn = Button(
-            screen,
-            text="Level 4",
-            center=(
-                settings.screen_width // 2,
-                settings.screen_height // 2 + 180,
-            ),
-            width=400,
-            height=100,
-            font_path=retro_font_path,
-            font_size=50,
-        )
-        level5_btn = Button(
-            screen,
-            text="Level 5",
-            center=(
-                settings.screen_width // 2,
-                settings.screen_height // 2 + 300,
-            ),
-            width=400,
-            height=100,
-            font_path=retro_font_path,
-            font_size=50,
-        )
-        endless_btn = Button(
-            screen,
-            text="Endless",
-            center=(
-                settings.screen_width // 2,
-                settings.screen_height // 2 + 420,
-            ),
-            width=400,
-            height=100,
-            font_path=retro_font_path,
-            font_size=50,
-            bg_color=(20, 40, 20),
-            hover_color=(40, 80, 40),
-        )
-        while show_levels[0]:
+
+        while selecting:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    show_levels[0] = False
                     return "exit"
-                if level1_btn.is_clicked(event):
-                    selected_level[0] = 1
-                    settings.level = 1
-                    show_levels[0] = False
-                if level2_btn.is_clicked(event):
-                    selected_level[0] = 2
-                    settings.level = 2
-                    show_levels[0] = False
-                if level3_btn.is_clicked(event):
-                    selected_level[0] = 3
-                    settings.level = 3
-                    show_levels[0] = False
-                if level4_btn.is_clicked(event):
-                    selected_level[0] = 4
-                    settings.level = 4
-                    show_levels[0] = False
-                if level5_btn.is_clicked(event):
-                    selected_level[0] = 5
-                    settings.level = 5
-                    show_levels[0] = False
-                if endless_btn.is_clicked(event):
-                    selected_level[0] = 9999
-                    settings.level = 9999
-                    show_levels[0] = False
+
+                for btn, lvl, is_unlocked in level_buttons:
+                    if is_unlocked and btn.is_clicked(event):
+                        return lvl  # Возвращаем выбранный уровень
+
             stars.update()
             screen.fill(settings.bg_color)
             stars.draw(screen)
+
             title = font.render("Select Level", True, (255, 255, 255))
             screen.blit(
                 title,
-                title.get_rect(
-                    center=(
-                        settings.screen_width // 2,
-                        settings.screen_height // 2 - 300,
-                    )
-                ),
+                title.get_rect(center=(settings.screen_width // 2, start_y - 120)),
             )
-            level1_btn.draw()
-            level2_btn.draw()
-            level3_btn.draw()
-            level4_btn.draw()
-            level5_btn.draw()
-            endless_btn.draw()
+
+            for btn, _, _ in level_buttons:
+                btn.draw()
+
             pygame.display.flip()
             clock.tick(60)
 
-    # print("main_menu start")
     pygame.display.update()
-    # Загружаем изображения после установки video mode
     music_on_img = pygame.image.load(
         os.path.join(os.path.dirname(__file__), "../images/music_on.png")
     ).convert_alpha()
@@ -236,9 +179,10 @@ def main_menu():
     )
     music_btn_rect = music_on_img.get_rect(topleft=(10, 10))
 
-    # --- Синхронизация состояния кнопки с глобальным SOUND_ENABLED ---
     import builtins
 
+    music_playing = [True]
+    sound_enabled = [True]
     if hasattr(builtins, "SOUND_ENABLED"):
         sound_enabled[0] = bool(builtins.SOUND_ENABLED)
         music_playing[0] = bool(builtins.SOUND_ENABLED)
@@ -250,18 +194,17 @@ def main_menu():
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # print("main_menu exit")
                 return "exit"
             if play_button.is_clicked(event):
-                # print("main_menu play")
                 return selected_level[0]
             if exit_button.is_clicked(event):
-                # print("main_menu exit btn")
                 return "exit"
             if levels_button.is_clicked(event):
-                # print("main_menu levels")
                 show_levels[0] = True
-                draw_levels_menu()
+                lvl = draw_levels_menu()  # Получаем выбранный уровень из меню
+                if isinstance(lvl, int):
+                    selected_level[0] = lvl
+                    settings.level = lvl
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if music_btn_rect.collidepoint(event.pos):
                     if music_playing[0]:
@@ -280,34 +223,23 @@ def main_menu():
         screen.blit(
             title_text,
             title_text.get_rect(
-                center=(
-                    settings.screen_width // 2,
-                    settings.screen_height // 4,
-                )
+                center=(settings.screen_width // 2, settings.screen_height // 4)
             ),
         )
         play_button.draw()
         levels_button.draw()
         exit_button.draw()
-        # Кнопка музыки
+
         if music_playing[0]:
             screen.blit(music_on_img, (music_btn_rect.x, music_btn_rect.y))
         else:
             screen.blit(music_off_img, (music_btn_rect.x, music_btn_rect.y))
 
-        # Глобально сохраняем состояние звука для игрового процесса
-        import builtins
-
         builtins.SOUND_ENABLED = sound_enabled[0]
-        # Отображение уровня в главном меню (белый цвет)
-        retro_font_path = os.path.join(base_folder, "fonts&music", "retro_font.otf")
         font = pygame.font.Font(retro_font_path, 48)
         level_surf = font.render(f"Level: {selected_level[0]}", True, (255, 255, 255))
         level_rect = level_surf.get_rect(
-            bottomright=(
-                settings.screen_width - 20,
-                settings.screen_height - 20,
-            )
+            bottomright=(settings.screen_width - 20, settings.screen_height - 20)
         )
         screen.blit(level_surf, level_rect)
         pygame.display.flip()

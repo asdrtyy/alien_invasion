@@ -45,7 +45,13 @@ class AlienInvasion:
             (self.settings.screen_width, self.settings.screen_height)
         )
         pygame.display.set_caption("Alien Invasion")
-        self.ship = Ship(self)
+
+        previous_lives = getattr(self, "ship", None)
+        if previous_lives:
+            self.ship = Ship(self, lives=previous_lives.lives)
+        else:
+            self.ship = Ship(self)
+        self.ship.center_ship()
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.stars = pygame.sprite.Group()
@@ -180,8 +186,7 @@ class AlienInvasion:
             )
             if result == "continue" and not is_last_level:
                 self.state.next_level()
-                # self._create_fleet()  # УБРАНО! Новый флот создаётся только
-                # при старте уровня, не при смене движения
+                self._create_fleet()
                 self.bullets.empty()
             elif result == "menu" or (is_last_level and result == "continue"):
                 level = main_menu()
@@ -193,6 +198,7 @@ class AlienInvasion:
         base_speed = 0.3  # минимальная скорость
         speed = base_speed * (2 ** (self.state.level - 1))
         speed = min(speed, 1.2)  # максимальная скорость 1.2
+
         # Все пришельцы движутся только вниз
         for alien in self.aliens.sprites():
             if not hasattr(alien, "y"):
@@ -200,6 +206,7 @@ class AlienInvasion:
             alien.y += speed
             alien.rect.y = int(alien.y)
             alien.rect.x = int(alien.rect.x)
+
         # Проверка столкновения с кораблем
         if not self.ship.is_animating:
             collided_alien = pygame.sprite.spritecollideany(self.ship, self.aliens)
@@ -222,18 +229,16 @@ class AlienInvasion:
                 self.ship.start_death_animation()
                 self.collision_flash_time = pygame.time.get_ticks() + 300
                 self.bullets.empty()
-        if (
-            hasattr(self, "_was_animating")
-            and self.ship.is_animating
-            and self._was_animating
-            and not self.ship.is_animating
-        ):
+
+        #  Уменьшение количества жизней после завершения анимации
+        if self._was_animating and not self.ship.is_animating:
             self.ship.lives -= 1
             if self.ship.lives <= 0:
                 self._game_over_screen()
+
         self._was_animating = self.ship.is_animating
 
-    # ...existing code...
+
 
     def _create_fleet(self):
         # Количество полос зависит от уровня: 1 — одна, 2 — две, 3 и выше — три
@@ -341,6 +346,7 @@ class AlienInvasion:
         )
         if result == "restart":
             self.__init__(level=self.state.level)
+            self.ship.lives = 3  # <-- ОБЯЗАТЕЛЬНО сбрасываем жизни
             self.run_game()
         elif result == "menu":
             level = main_menu()
@@ -348,8 +354,8 @@ class AlienInvasion:
                 self.game_active = False
                 return
             self.__init__(level=level)
+            self.ship.lives = 3  # <-- и здесь тоже сброс жизней
             self.run_game()
-
 
 # Точка входа
 
