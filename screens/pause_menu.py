@@ -29,7 +29,8 @@ def pause_menu(screen, stars, settings, level):
     )
     music_btn_rect = music_on_img.get_rect(topleft=(10, 10))
     music_playing = [
-        pygame.mixer.music.get_busy() and not pygame.mixer.music.get_pos() == -1
+        pygame.mixer.music.get_busy()
+        and not pygame.mixer.music.get_pos() == -1
     ]
     sound_enabled = [builtins.SOUND_ENABLED]
     # --- Синхронизация состояния кнопки с глобальным SOUND_ENABLED ---
@@ -102,7 +103,9 @@ def pause_menu(screen, stars, settings, level):
         builtins.SOUND_ENABLED = sound_enabled[0]
         # Корректное отображение уровня в меню паузы (белый цвет)
         base_folder = os.path.dirname(os.path.dirname(__file__))
-        retro_font_path = os.path.join(base_folder, "fonts&music", "retro_font.otf")
+        retro_font_path = os.path.join(
+            base_folder, "fonts&music", "retro_font.otf"
+        )
         font = pygame.font.Font(retro_font_path, 48)
         level_surf = font.render(f"Level: {level}", True, (255, 255, 255))
         level_rect = level_surf.get_rect(

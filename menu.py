@@ -9,9 +9,11 @@ from entities.stars import Star
 
 def dummy_game_setup():
     """Настройка для создания объекта игры без запуска."""
-    pygame.init()
+    
     settings = Settings()
-    screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
+    screen = pygame.display.set_mode(
+        (settings.screen_width, settings.screen_height)
+    )
     pygame.display.set_caption("Alien Invasion")
     return screen, settings
 
@@ -68,7 +70,9 @@ def run_menu():
     screen, settings = dummy_game_setup()
     stars = create_stars_group(settings)
     base_folder = os.path.dirname(__file__)
-    retro_font_path = os.path.join(base_folder, "fonts&music", "retro_font.otf")
+    retro_font_path = os.path.join(
+        base_folder, "fonts&music", "retro_font.otf"
+    )
 
     clock = pygame.time.Clock()
 

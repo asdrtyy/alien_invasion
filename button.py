@@ -52,7 +52,11 @@ class Button:
     def draw(self):
         """Рисует кнопку на экране."""
         mouse_pos = pygame.mouse.get_pos()
-        color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.bg_color
+        color = (
+            self.hover_color
+            if self.rect.collidepoint(mouse_pos)
+            else self.bg_color
+        )
         pygame.draw.rect(
             self.screen, color, self.rect, border_radius=self.border_radius
         )
@@ -64,11 +68,13 @@ class Button:
             border_radius=self.border_radius,
         )
         self.screen.blit(self.text_surf, self.text_rect)
-
+        
     def is_clicked(self, event):
-        """Проверяет, была ли нажата кнопка мышью."""
-        return (
+        clicked = (
             event.type == pygame.MOUSEBUTTONDOWN
             and event.button == 1
-            and self.rect.collidepoint(pygame.mouse.get_pos())
+            and self.rect.collidepoint(event.pos)
         )
+        if clicked:
+            print(f"Button '{self.text}' clicked!")
+        return clicked

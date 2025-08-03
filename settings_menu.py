@@ -8,8 +8,10 @@ from settings import Settings
 
 
 def settings_menu(settings):
-    pygame.init()
-    screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
+    
+    screen = pygame.display.set_mode(
+        (settings.screen_width, settings.screen_height)
+    )
     pygame.display.set_caption("Settings")
     clock = pygame.time.Clock()
     base_folder = os.path.dirname(__file__)

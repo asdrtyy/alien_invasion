@@ -26,8 +26,12 @@ def level_complete_screen(screen, stars, settings, level, is_last_level=False):
     title_rect = title_surf.get_rect(center=(settings.screen_width // 2, 200))
     if congrats_text:
         congrats_font = pygame.font.Font(font_path, 70)
-        congrats_surf = congrats_font.render(congrats_text, True, (255, 255, 0))
-        congrats_rect = congrats_surf.get_rect(center=(settings.screen_width // 2, 350))
+        congrats_surf = congrats_font.render(
+            congrats_text, True, (255, 255, 0)
+        )
+        congrats_rect = congrats_surf.get_rect(
+            center=(settings.screen_width // 2, 350)
+        )
     button_height = 120
     button_spacing = 40
     continue_y = settings.screen_height // 2 + 100
@@ -70,7 +74,9 @@ def level_complete_screen(screen, stars, settings, level, is_last_level=False):
             continue_button.draw()
         menu_button.draw()
         # Level внизу экрана — тем же ретро-шрифтом
-        retro_font_path = os.path.join(base_folder, "fonts&music", "retro_font.otf")
+        retro_font_path = os.path.join(
+            base_folder, "fonts&music", "retro_font.otf"
+        )
         font = pygame.font.Font(retro_font_path, 48)
         level_surf = font.render(f"Level: {level}", True, (255, 255, 255))
         level_rect = level_surf.get_rect(

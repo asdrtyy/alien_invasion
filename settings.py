@@ -11,10 +11,10 @@ class Settings:
         self.bg_color = (0, 0, 53)  # Цвет фона
 
         # Параметры корабля
-        self.ship_speed = 4.5
+        self.ship_speed = 7
 
         # Параметры пули
-        self.bullet_speed = 1
+        self.bullet_speed = 3
         self.bullet_width = 3
         self.bullet_height = 15
         self.bullet_color = (255, 69, 0)  # Цвет пули
