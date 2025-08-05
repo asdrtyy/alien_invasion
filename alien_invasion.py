@@ -40,7 +40,7 @@ class AlienInvasion:
     """Главный класс игры Alien Invasion."""
 
     def __init__(self, level=1):
-       
+
         self.settings = Settings()
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height)
@@ -85,6 +85,8 @@ class AlienInvasion:
         self.music_btn_rect = None
         self.music_playing = True
 
+        self.level_complete = False
+
     def run_game(self):
         while self.game_active:
             result = self.play_level()
@@ -104,19 +106,39 @@ class AlienInvasion:
         """Основной игровой цикл, возвращает результат после завершения уровня или смерти."""
         while self.game_active:
             self._check_events()
-            if self.game_active and not self.paused:
+            if not self.paused:
                 self.ship.update()
             self._update_bullets()
             self._update_aliens()
             self.stars.update()
             self.explosions.update()
             self._update_screen()
-            
-            # Здесь можно добавить небольшую задержку, чтобы не перегружать процессор
-            pygame.time.Clock().tick(60)
 
-        # Если дошли сюда — значит игра завершена, либо уровень окончен
-        # Возвращаем код, который определим в других методах
+        if self.level_complete:
+            is_last = not self.endless_mode and self.state.level >= 5
+            result = level_complete_screen(
+                self.screen,
+                self.stars,
+                self.settings,
+                self.state.level,
+                is_last_level=is_last,
+            )
+            if result == "continue" and not is_last:
+                self.state.next_level()
+                if self.state.level > self.unlocked_levels:
+                    self.unlocked_levels = self.state.level
+                    save_unlocked_levels(self.unlocked_levels)
+                self._create_fleet()
+                self.bullets.empty()
+                self.level_complete = False
+            else:
+                # menu или last level дальше
+                self.end_reason = "menu"
+                self.game_active = False
+                return self.end_reason
+
+        pygame.time.Clock().tick(60)
+
         return getattr(self, "end_reason", "menu")
 
     def _check_events(self):
@@ -182,6 +204,7 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
+
         collisions = pygame.sprite.groupcollide(self.aliens, self.bullets, False, True)
         if collisions:
             try:
@@ -199,6 +222,7 @@ class AlienInvasion:
                         explosion_sound.play()
             except Exception:
                 pass
+
             for alien, bullets in collisions.items():
                 if hasattr(alien, "health"):
                     alien.health -= len(bullets)
@@ -209,34 +233,34 @@ class AlienInvasion:
                         explosion = Explosion(center, size=size)
                         self.explosions.add(explosion)
                         self.state.add_score(100)
-            if not self.aliens and not self.explosions:
-                is_last_level = not self.endless_mode and self.state.level >= 5
-                result = level_complete_screen(
-                    self.screen,
-                    self.stars,
-                    self.settings,
-                    self.state.level,
-                    is_last_level=is_last_level,
-                )
-                if result == "continue" and not is_last_level:
-                    self.state.next_level()
-                    if self.state.level > self.unlocked_levels:
-                        self.unlocked_levels = self.state.level
-                        save_unlocked_levels(self.unlocked_levels)
-                    self._create_fleet()
-                    self.bullets.empty()
-                        # Продолжаем игру с новым уровнем, ничего менять не надо
-                elif result == "menu" or (is_last_level and result == "continue"):
-                    # Запоминаем причину выхода, чтобы play_level вернул ее
-                    self.end_reason = "menu"
-                    self.game_active = False  # остановить текущий игровой цикл
-                    #  Можно добавить "exit", если нужно выйти из игры
+
+        if not self.aliens and not self.explosions:
+            is_last_level = not self.endless_mode and self.state.level >= 5
+            result = level_complete_screen(
+                self.screen,
+                self.stars,
+                self.settings,
+                self.state.level,
+                is_last_level=is_last_level,
+            )
+            pygame.display.flip()
+
+            if result == "continue" and not is_last_level:
+                self.state.next_level()
+                if self.state.level > self.unlocked_levels:
+                    self.unlocked_levels = self.state.level
+                    save_unlocked_levels(self.unlocked_levels)
+                self._create_fleet()
+                self.bullets.empty()
+            elif result == "menu" or (is_last_level and result == "continue"):
+                self.end_reason = "menu"
+                self.game_active = False
 
     def _update_aliens(self):
         # Скорость пришельцев зависит от уровня
         base_speed = 0.3  # минимальная скорость
         speed = base_speed * (2 ** (self.state.level - 1))
-        speed = min(speed, 1.2)  # максимальная скорость 1.2
+        speed = min(speed, 0.6)  # максимальная скорость 1.2
 
         # Все пришельцы движутся только вниз
         for alien in self.aliens.sprites():
@@ -276,8 +300,6 @@ class AlienInvasion:
                 self._game_over_screen()
 
         self._was_animating = self.ship.is_animating
-
-
 
     def _create_fleet(self):
         # Количество полос зависит от уровня: 1 — одна, 2 — две, 3 и выше — три
@@ -387,15 +409,16 @@ class AlienInvasion:
             self.end_reason = "menu"
             self.game_active = False
 
+
 # Точка входа
 
 
 if __name__ == "__main__":
     pygame.init()
     play_background_music()
-    selected_level = main_menu()  
+    selected_level = main_menu()
     if selected_level == "exit":
         sys.exit()
-    
+
     ai = AlienInvasion(level=selected_level)
     ai.run_game()

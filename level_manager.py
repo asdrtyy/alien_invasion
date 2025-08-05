@@ -17,7 +17,7 @@ class LevelManager:
         if level in self.levels:
             return self.levels[level]
         else:
-            alien_health = 1 + (level // 2)
+            alien_health = 1 
             rows = min(3, 2 + (level // 2))
             return {"alien_health": alien_health, "rows": rows}
 
